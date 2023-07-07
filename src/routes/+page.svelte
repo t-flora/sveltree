@@ -6,6 +6,7 @@
 <a href="/hello">Hellooo</a> -->
 {#if $user}
     <slot />
+    <a href="/login">sign in</a>
 {:else}
     <p class="text-error">
         you must be signed in to view this, lad
