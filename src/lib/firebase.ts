@@ -1,9 +1,9 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from "firebase/firestore";
+import { doc, getFirestore, onSnapshot } from "firebase/firestore";
 import type { User } from "firebase/auth";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getStorage } from "firebase/storage";
-import { writable } from 'svelte/store';
+import { derived, writable } from 'svelte/store';
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyCEk-atmGRQhiiC-fGXQ6gKon4mSKJfoNY",
@@ -45,3 +45,45 @@ function userStore() {
 }
 
 export const user = userStore();
+
+/**
+ * Creates a store with realtime document data
+ * @param {any} path:string
+ * @returns {any}
+ */
+export function docStore<T>(
+    path: string,
+) {
+    let unsubscribe: () => void;
+
+    const docRef = doc(db, path);
+
+    const { subscribe } = writable<T | null>(null, (set) => {
+        unsubscribe = onSnapshot(docRef, (snapshot) => {
+            set((snapshot.data() as T) ?? null);
+        });
+        return () => unsubscribe();
+    });
+
+    return {
+        subscribe,
+        ref: docRef,
+        id: docRef.id,
+    };
+}
+
+interface UserData {
+    username: string,
+    bio: string,
+    photoURL: string,
+    links: any[]
+}
+
+export const userData = derived(user, ($user, set) => {
+    // Derived store is used to get both user data and authentication state at once
+    if ($user) {
+        return docStore<UserData>(`users/${$user.uid}`).subscribe(set);
+    } else {
+        set(null);
+    }
+})
