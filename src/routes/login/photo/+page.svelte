@@ -35,7 +35,7 @@
         <div class="form-control w-full max-w-xs my-10 mx-auto text-center">
             <img
                 src={previewURL ?? $userData?.photoURL ?? "/user.png"}
-                alt="photo URL"
+                alt="user profile"
                 width="256"
                 height="256"
                 class="mx-auto"
@@ -55,7 +55,6 @@
                 <progress class="progress progress-info w-56 mt-6" />
             {/if}
         </div>
-
         <a {href} class="btn btn-primary">finish</a>
     </form>
 </AuthCheck>
